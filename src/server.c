@@ -14,12 +14,7 @@ int main() {
     // SOCK_STREAM - duplex 
     struct sockaddr_in adr = {0};
     adr.sin_family = AF_INET;
-
-    int port;
-    scanf("%d", &port);
-    printf("%d\n", port);
-
-    adr.sin_port = htons(port);
+    adr.sin_port = htons(34543);
     Bind(server, (struct sockaddr *) &adr, sizeof adr);
     Listen(server, 5);
     socklen_t adrlen = sizeof adr;
