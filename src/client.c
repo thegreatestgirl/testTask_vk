@@ -13,6 +13,11 @@ int main() {
     struct sockaddr_in adr = {0};
     adr.sin_family = AF_INET;
     adr.sin_port = htons(34543);
+
+    char ipServer[20];
+    scanf("%s", ipServer);
+    printf("%s\n", ipServer);
+
     Inet_pton(AF_INET, "127.0.0.1", &adr.sin_addr);
     Connect(fd, (struct sockaddr *) &adr, sizeof adr);
     write(fd, "Hi there\n", 9);
