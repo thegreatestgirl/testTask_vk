@@ -18,7 +18,7 @@ int main() {
     scanf("%s", ipServer);
     printf("%s\n", ipServer);
 
-    Inet_pton(AF_INET, "127.0.0.1", &adr.sin_addr);
+    Inet_pton(AF_INET, ipServer, &adr.sin_addr);
     Connect(fd, (struct sockaddr *) &adr, sizeof adr);
     write(fd, "Hi there\n", 9);
     char buf[256];
