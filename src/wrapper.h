@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdio.h>
 
 int Socket(int domain, int type, int protocol);
 

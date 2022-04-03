@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <string.h>
 
 int Socket(int domain, int type, int protocol) {
     int socketCreate;
