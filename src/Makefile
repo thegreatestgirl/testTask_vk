@@ -1,13 +1,24 @@
 CC = gcc
 
-server: gcc server.c wrapper.c -o server
+# server: gcc server.c wrapper.c -o server
 
-client: gcc client.c wrapper.c -o client
+server.o: server.c
+	$(CC) -c server.c
+
+# client: gcc client.c wrapper.c -o client
+
+client.o: client.c
+	$(CC) -c client.c
+
+server: server.o
+	$(CC) -o server.o
+
+client: client.o
+	$(CC) -o client.o
 
 all: server client
 
 clean:
-	rm server
-	rm client
+	rm -rf *.o
 
 rebuild: clean all
