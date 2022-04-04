@@ -18,10 +18,10 @@ CC = gcc
 all: server client
 
 server: server.c wrapper.c
-	gcc server.c wrapper.c -o server
+	$(CC) server.c wrapper.c -o server
 
 client: client.c wrapper.c
-	gcc client.c wrapper.c -o client
+	$(CC) client.c wrapper.c -o client
 
 clean:
 	rm -rf *.o

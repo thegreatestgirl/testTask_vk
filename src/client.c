@@ -13,7 +13,7 @@ void send_file(FILE *file, int sockfd){
 
     while(fgets(data, SIZE, file) != NULL) {
         if (send(sockfd, data, sizeof(data), 0) == -1) {
-            perror("[-]Error in sending file.");
+            perror("( x)( x) data sending failed");
             exit(EXIT_FAILURE);
         }
         bzero(data, SIZE);
@@ -22,22 +22,21 @@ void send_file(FILE *file, int sockfd){
 
 int main(){
     char ip[20];
-    printf("Enter ip of server:\n");
+    printf("( |)( |) ip of server, please\n");
     scanf("%s", ip);
-    printf("You entered: %s\n", ip);
+    printf("( .)( .) you entered: %s\n", ip);
 
-    int port = 34588;
+    int port = 8080;
     int e;
     struct sockaddr_in server_addr;
     FILE *file;
 
     char filename[100];
-    printf("Enter path of file to send:\n");
+    printf("( |)( |) file, which you want to send, please:\n");
     scanf("%s", filename);
-    printf("The path of file: %s\n", filename);
 
     int sockfd = Socket(AF_INET, SOCK_STREAM, 0);
-    printf("[+]Server socket created successfully.\n");
+    printf("( .)( .) socket created\n");
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = port;
@@ -45,22 +44,24 @@ int main(){
 
     e = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
     if(e == -1) {
-        perror("[-]Error in socket");
+        perror("( x)( x) connection failed");
         exit(EXIT_FAILURE);
     }
-    printf("[+]Connected to Server.\n");
+    printf("( .)( .) connection to server created\n");
 
     file = fopen(filename, "r");
     if (file == NULL) {
-        perror("[-]Error in reading file.");
+        perror("( x)( x) file reading failed");
         exit(EXIT_FAILURE);
     }
 
     send_file(file, sockfd);
-    printf("[+]File data sent successfully.\n");
+    printf("( .)( .) data sent\n");
 
-    printf("[+]Closing the connection.\n");
+    fclose(file);
     close(sockfd);
+
+    printf("( .)( .) connection closed\n");
 
     return 0;
 }

@@ -5,51 +5,50 @@
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 void write_file(int sockfd, char* directory){
-    int n;
-    FILE *fp;
-
     char *filename = "new.txt";
     char check[100] = "/";
 
     if (strcmp(directory, check) == 0) {
         directory = filename;
-        printf("The full path to file: %s\n", directory);
+        printf("( .)( .) full path to file is: %s\n", directory);
     } else {
         strcat(directory, "/");
         strcat(directory, filename);
-        printf("The full path to file: %s\n", directory);
+        printf("( .)( .) full path to file is: %s\n", directory);
     }
 
+    int n;
+    FILE *file;
     char buffer[SIZE];
 
-    fp = fopen(directory, "w+");
+    file = fopen(directory, "w+");
+
     while (1) {
-    n = recv(sockfd, buffer, SIZE, 0);
-    if (n <= 0){
-        break;
-        return;
+        n = recv(sockfd, buffer, SIZE, 0);
+        if (n <= 0){
+            break;
+            return;
+        }
+        fprintf(file, "%s", buffer);
+        bzero(buffer, SIZE);
     }
-    fprintf(fp, "%s", buffer);
-    bzero(buffer, SIZE);
-    }
-    return;
+    fclose(file);
 }
 
 int main(){
     char *ip = "0.0.0.0";
-//   int port = 34588;
-    int e;
-    int port;
-    printf("please, enter port: ");
+    int e, port;
+    printf("( |)( |) port for listening, please\n");
     scanf("%d", &port);
-    printf("%d\n", port);
+    printf("( .)( .) you entered: %d\n", port);
 
     char directory[100];
-    printf("please, enter dir to save file: ");
+    printf("( |)( |) directory to save file, please\n");
     scanf("%s", directory);
-    printf("The directory: %s\n", directory);
+    printf("( .)( .) you entered: %s\n", directory);
     
 
     int sockfd, new_sock;
@@ -58,11 +57,7 @@ int main(){
     char buffer[SIZE];
 
     sockfd = Socket(AF_INET, SOCK_STREAM, 0);
-    // if(sockfd < 0) {
-    // perror("[-]Error in socket");
-    // exit(1);
-    // }
-    printf("[+]Server socket created successfully.\n");
+    printf("( .)( .) socket created\n");
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = port;
@@ -70,24 +65,23 @@ int main(){
 
     e = bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
     if(e < 0) {
-    perror("[-]Error in bind");
-    exit(1);
+        perror("( x)( x) bind failed");
+        exit(EXIT_FAILURE);
     }
-    printf("[+]Binding successfull.\n");
+    printf("( .)( .) bind created\n");
 
-    // if(listen(sockfd, 10) == 0){
-	//     printf("[+]Listening....\n");
-    // }else{
-	//     perror("[-]Error in listening");
-    // exit(1);
-    // }
     Listen(sockfd, 10);
-    printf("[+]Listening....\n");
+    printf("( .)( .) ....listening.... (. )(. )\n");
 
     addr_size = sizeof(new_addr);
     new_sock = Accept(sockfd, (struct sockaddr*)&new_addr, &addr_size);
-    write_file(new_sock, directory);
-    printf("[+]Data written in the file successfully.\n");
 
+    write_file(new_sock, directory);
+    printf("( .)( .) data saved\n");
+
+    sleep(5);
+    close(new_sock);
+    close(sockfd);
+    printf("( .)( .) connection closed\n");
     return 0;
 }
