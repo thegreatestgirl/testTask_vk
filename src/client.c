@@ -1,69 +1,68 @@
-#include "wrapper.h"
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <arpa/inet.h>
+#define SIZE 1024
 
-int main() {
-    int fd = Socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in adr = {0};
-    adr.sin_family = AF_INET;
-    adr.sin_port = htons(34588);
+void send_file(FILE *fp, int sockfd){
+  int n;
+  char data[SIZE] = {0};
 
-    FILE *file;
-    char *filename = "test.txt";
-
-
-    char ipServer[20];
-    scanf("%s", ipServer);
-    printf("%s\n", ipServer);
-
-    Inet_pton(AF_INET, ipServer, &adr.sin_addr);
-    Connect(fd, (struct sockaddr *) &adr, sizeof adr);
-    write(fd, "Hi there\n", 9);
-    char buf[256];
-    ssize_t nread;
-    nread = read(fd, buf, 256);
-    if (nread == -1) {
-        perror("read failed");
-        exit(EXIT_FAILURE);
+  while(fgets(data, SIZE, fp) != NULL) {
+    if (send(sockfd, data, sizeof(data), 0) == -1) {
+      perror("[-]Error in sending file.");
+      exit(1);
     }
-    if (nread == 0) {
-        printf("EOF occured\n");
-    }
-    write(STDOUT_FILENO, buf, nread);
+    bzero(data, SIZE);
+  }
+}
 
-    file = fopen(filename, "r");
-    if (file == NULL) {
-        perror("file reading failed");
-        exit(EXIT_FAILURE);
-    }
-    printf("before sending\n");
-    // sending(file, fd);
+int main(){
+//   char *ip = "127.0.0.1";
+  char ip[20];
+  scanf("%s", ip);
+  printf("%s\n", ip);
+  int port = 34588;
+  int e;
 
-    // char data[256] = {0};
-    printf("before while");
+  int sockfd;
+  struct sockaddr_in server_addr;
+  FILE *fp;
+//   char *filename = "test.txt";
+char filename[100];
+scanf("%s", filename);
+printf("The path of file: %s\n", filename);
 
-    char data[256] = {0};
-    while (!feof(file)) {
-        if (send(fd, data, sizeof(data), 0) == -1) {
-            perror("file sending failed");
-            exit(EXIT_FAILURE);
-        }
-        // bzero(data, 256);
-        memset(data, 0, 256);
-    }
-    printf("after");
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if(sockfd < 0) {
+    perror("[-]Error in socket");
+    exit(1);
+  }
+  printf("[+]Server socket created successfully.\n");
 
-    printf("send successfully\n");
-    // fclose(file);
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = port;
+  server_addr.sin_addr.s_addr = inet_addr(ip);
 
-    sleep(10);
-    close(fd);
-    return 0;
+  e = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+  if(e == -1) {
+    perror("[-]Error in socket");
+    exit(1);
+  }
+	printf("[+]Connected to Server.\n");
+
+  fp = fopen(filename, "r");
+  if (fp == NULL) {
+    perror("[-]Error in reading file.");
+    exit(1);
+  }
+
+  send_file(fp, sockfd);
+  printf("[+]File data sent successfully.\n");
+
+	printf("[+]Closing the connection.\n");
+  close(sockfd);
+
+  return 0;
 }

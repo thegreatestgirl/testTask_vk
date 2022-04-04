@@ -1,80 +1,72 @@
-#include "wrapper.h"
-
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <string.h>
+#include <arpa/inet.h>
+#define SIZE 1024
 
-void writing(int sockfd) {
-    int n;
-    FILE *fp;
-    char *filename = "new.txt";
-    char buf[256];
+void write_file(int sockfd){
+  int n;
+  FILE *fp;
+  char *filename = "new.txt";
+  char buffer[SIZE];
 
-    fp = fopen(filename, "w");
-    if (fp == NULL) {
-        perror("file creating failed");
-        exit(EXIT_FAILURE);
+  fp = fopen(filename, "w");
+  while (1) {
+    n = recv(sockfd, buffer, SIZE, 0);
+    if (n <= 0){
+      break;
+      return;
     }
-    while (1) {
-        n = recv(sockfd, buf, 256, 0);
-        if (n <= 0) {
-            break;
-            return;
-        }
-        fprintf(fp, "%s", buf);
-        // bzero(buf, 256);
-        memset(buf, 0, 256);
-    }
-    // fclose(fp);
+    fprintf(fp, "%s", buffer);
+    bzero(buffer, SIZE);
+  }
+  return;
 }
 
-int main() {
-    int server = Socket(AF_INET, SOCK_STREAM, 0);
-    // AF_INET - IPv4
-    // SOCK_STREAM - duplex 
-    struct sockaddr_in adr = {0};
-    adr.sin_family = AF_INET;
-
-    int port;
+int main(){
+  char *ip = "0.0.0.0";
+//   int port = 34588;
+  int e;
+  int port;
     printf("please, enter port: ");
     scanf("%d", &port);
     printf("%d\n", port);
 
-    adr.sin_port = htons(port);
-    Bind(server, (struct sockaddr *) &adr, sizeof adr);
-    Listen(server, 5);
-    socklen_t adrlen = sizeof adr;
-    int fd = Accept(server, (struct sockaddr *) &adr, &adrlen);
-    ssize_t nread;
-    char buf[256];
-    nread = read(fd, buf, 256);
-    if (nread == -1) {
-        perror("read failed");
-        exit(EXIT_FAILURE);
-    }
-    if (nread == 0) {
-        printf("EOF occured\n");
-    }
-    write(STDOUT_FILENO, buf, nread);
-    write(fd, buf, nread);
 
-    int newSocket;
-    struct sockaddr_in new;
+  int sockfd, new_sock;
+  struct sockaddr_in server_addr, new_addr;
+  socklen_t addr_size;
+  char buffer[SIZE];
 
-    adrlen = sizeof(new);
-    newSocket = Accept(server, (struct sockaddr*) &new, &adrlen);
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if(sockfd < 0) {
+    perror("[-]Error in socket");
+    exit(1);
+  }
+  printf("[+]Server socket created successfully.\n");
 
-    writing(newSocket);
-    printf("successfully writed");
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = port;
+  server_addr.sin_addr.s_addr = inet_addr(ip);
 
-    sleep(15);
+  e = bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+  if(e < 0) {
+    perror("[-]Error in bind");
+    exit(1);
+  }
+  printf("[+]Binding successfull.\n");
 
-    close(fd);
-    close(server);
-    return 0;
+  if(listen(sockfd, 10) == 0){
+		printf("[+]Listening....\n");
+	}else{
+		perror("[-]Error in listening");
+    exit(1);
+	}
+
+  addr_size = sizeof(new_addr);
+  new_sock = accept(sockfd, (struct sockaddr*)&new_addr, &addr_size);
+  write_file(new_sock);
+  printf("[+]Data written in the file successfully.\n");
+
+  return 0;
 }
