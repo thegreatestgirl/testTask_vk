@@ -1,8 +1,8 @@
 CC = gcc
 
-server: $(CC) server.c wrapper.c -o server
+server: gcc server.c wrapper.c -o server
 
-client: $(CC) client.c wrapper.c -o client
+client: gcc client.c wrapper.c -o client
 
 all: server client
 
