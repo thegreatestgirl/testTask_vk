@@ -4,13 +4,18 @@
 #include <arpa/inet.h>
 #define SIZE 1024
 
-void write_file(int sockfd){
+void write_file(int sockfd, char* directory){
   int n;
   FILE *fp;
-  char *filename = "new.txt";
+
+    char *filename = "new.txt";
+    strcat(directory, "/");
+    strcat(directory, filename);
+    printf("The full path to file: %s\n", directory);
+
   char buffer[SIZE];
 
-  fp = fopen(filename, "w");
+  fp = fopen(directory, "w+");
   while (1) {
     n = recv(sockfd, buffer, SIZE, 0);
     if (n <= 0){
@@ -32,6 +37,11 @@ int main(){
     scanf("%d", &port);
     printf("%d\n", port);
 
+    char directory[100];
+    
+    scanf("%s", directory);
+    printf("The directory: %s\n", directory);
+    
 
   int sockfd, new_sock;
   struct sockaddr_in server_addr, new_addr;
@@ -65,7 +75,7 @@ int main(){
 
   addr_size = sizeof(new_addr);
   new_sock = accept(sockfd, (struct sockaddr*)&new_addr, &addr_size);
-  write_file(new_sock);
+  write_file(new_sock, directory);
   printf("[+]Data written in the file successfully.\n");
 
   return 0;
