@@ -1,4 +1,4 @@
-CC:=gcc
+CC = gcc
 
 server: $(CC) server.c wrapper.c -o server
 
